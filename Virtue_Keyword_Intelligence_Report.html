@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Virtue — Keyword Intelligence Report</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Indeed official brand palette */
+  --blue:#2557a7;
+  --black:#000000;
+  --white:#ffffff;
+  /* Derived tints — all blue or black based */
+  --blue-10:rgba(37,87,167,.08);
+  --blue-20:rgba(37,87,167,.18);
+  --blue-60:rgba(37,87,167,.60);
+  --bg:#f0f4fb;          /* very light blue-tinted page bg */
+  --border:#d0d9ea;      /* light blue-grey border */
+  --border-lt:#e4eaf4;
+  --t1:#000000;          /* primary text = black */
+  --t2:#222222;          /* secondary */
+  --t3:#555555;          /* tertiary */
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--t1);font-size:14px;line-height:1.5;overflow-x:hidden}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:100;background:var(--blue);border-bottom:3px solid rgba(255,255,255,.2)}
+.nav-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;padding:0 32px;height:52px}
+.nav-brand{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px;margin-right:32px;white-space:nowrap;display:flex;align-items:center;gap:12px}
+.nav-brand-divider{width:1px;height:20px;background:rgba(255,255,255,.3);flex-shrink:0}
+.nav-links{display:flex;flex:1}
+.nav-link{color:rgba(255,255,255,.65);font-size:12px;font-weight:600;text-decoration:none;padding:0 14px;height:52px;display:flex;align-items:center;letter-spacing:.4px;text-transform:uppercase;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;margin-bottom:-3px;white-space:nowrap}
+.nav-link:hover,.nav-link.active{color:#fff;border-bottom-color:#fff}
+.nav-meta{margin-left:auto;font-size:11px;color:rgba(255,255,255,.4);white-space:nowrap;padding-right:16px}
+.pdf-btn{display:flex;align-items:center;gap:7px;background:#fff;color:var(--blue);font-size:12px;font-weight:800;padding:0 16px;height:32px;border:none;border-radius:4px;cursor:pointer;letter-spacing:.3px;white-space:nowrap;flex-shrink:0;transition:background .15s}
+.pdf-btn:hover{background:rgba(255,255,255,.88)}
+.pdf-btn svg{flex-shrink:0}
+
+/* ── PAGE ── */
+.page{max-width:1280px;margin:0 auto;padding:32px 32px 64px}
+.section{margin-bottom:52px}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--blue)}
+.sh-num{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
+.sh-title{font-size:22px;font-weight:800;color:var(--black);letter-spacing:-.3px}
+.sh-desc{font-size:13px;color:var(--t3);margin-top:3px;max-width:680px}
+
+/* ── HERO ── */
+.hero{background:var(--blue);padding:44px 32px 48px}
+.hero-inner{max-width:1280px;margin:0 auto}
+.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:12px}
+.hero-title{font-size:34px;font-weight:900;line-height:1.1;letter-spacing:-.6px;color:#fff;margin-bottom:12px}
+.hero-subtitle{font-size:14px;color:rgba(255,255,255,.7);max-width:640px;line-height:1.7}
+.hero-meta{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.hero-tag{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:4px;padding:5px 14px;font-size:11px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.3px}
+
+/* ── KPI STRIP ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:22px 22px 20px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;background:var(--blue)}
+.kpi.kpi-inv{background:var(--blue);border-color:var(--blue)}
+.kpi.kpi-inv::before{background:rgba(255,255,255,.4)}
+.kpi.kpi-inv .kpi-val{color:#fff}
+.kpi.kpi-inv .kpi-lbl{color:rgba(255,255,255,.6)}
+.kpi.kpi-inv .kpi-sub{color:rgba(255,255,255,.5)}
+.kpi.kpi-inv .kpi-tag{background:rgba(255,255,255,.15);color:#fff}
+.kpi-val{font-size:34px;font-weight:900;line-height:1;letter-spacing:-1px;color:var(--black);margin-bottom:5px}
+.kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3)}
+.kpi-sub{font-size:12px;color:var(--t3);margin-top:4px}
+.kpi-tag{display:inline-block;background:var(--blue-10);color:var(--blue);font-size:10px;font-weight:700;padding:2px 10px;border-radius:3px;margin-top:6px;letter-spacing:.3px}
+
+/* ── CONTEXT BOX ── */
+.context-box{background:var(--white);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:0 6px 6px 0;padding:20px 24px;margin-bottom:28px}
+.context-box p{font-size:13px;color:var(--t2);line-height:1.75}
+.context-box strong{color:var(--black);font-weight:700}
+
+/* ── CHART ── */
+.chart-wrap{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:26px;margin-bottom:24px}
+.chart-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--black);margin-bottom:4px}
+.chart-sub{font-size:12px;color:var(--t3);margin-bottom:24px}
+.bar-track{display:flex;flex-direction:column;gap:12px}
+.bar-row{display:flex;align-items:center;gap:14px}
+.bar-name{font-size:13px;font-weight:700;color:var(--t2);width:138px;flex-shrink:0;text-align:right}
+.bar-outer{flex:1;background:var(--bg);border-radius:3px;height:34px;overflow:hidden}
+.bar-inner{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:14px}
+.bar-val{font-size:13px;font-weight:800;color:#fff;white-space:nowrap}
+.bar-pct{font-size:12px;color:var(--t3);width:50px;flex-shrink:0;text-align:right;font-weight:700}
+
+/* ── TERM CARDS ── */
+.term-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.term-card{background:var(--white);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.term-card-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:2px solid var(--blue);background:var(--blue)}
+.term-card-name{font-size:13px;font-weight:800;color:#fff}
+.term-card-badge{font-size:11px;font-weight:700;color:var(--blue);background:#fff;padding:2px 10px;border-radius:3px}
+.term-card-body table{width:100%;border-collapse:collapse}
+.term-card-body tr:not(:last-child){border-bottom:1px solid var(--border-lt)}
+.term-card-body td{padding:9px 16px;font-size:12px;color:var(--t2)}
+.term-card-body td:last-child{text-align:right;font-weight:700;color:var(--black);white-space:nowrap}
+.term-card-rank{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:800;margin-right:8px;flex-shrink:0;vertical-align:middle}
+
+/* ── SUMMARY TABLE ── */
+.summary-table-wrap{background:var(--white);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:28px}
+.summary-table{width:100%;border-collapse:collapse}
+.summary-table thead tr{background:var(--blue)}
+.summary-table thead th{padding:12px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:rgba(255,255,255,.75);text-align:left}
+.summary-table thead th.r{text-align:right}
+.summary-table tbody tr{border-bottom:1px solid var(--border-lt)}
+.summary-table tbody tr:last-child{border-bottom:none;background:var(--blue-10)}
+.summary-table tbody tr:last-child td{font-weight:800;color:var(--black)}
+.summary-table tbody td{padding:11px 16px;font-size:13px;color:var(--t2)}
+.summary-table tbody td.r{text-align:right;font-weight:600;color:var(--black)}
+.summary-table tbody td.rank{font-weight:800;color:var(--blue);text-align:center}
+.rank-bar{display:inline-block;height:6px;border-radius:2px;background:var(--blue);vertical-align:middle;margin-left:8px}
+
+/* ── INSIGHTS ── */
+.insights-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:28px}
+.insight{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:24px;border-top:4px solid var(--blue)}
+.insight-num{font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.insight-stat{font-size:30px;font-weight:900;color:var(--blue);letter-spacing:-.5px;line-height:1;margin-bottom:8px}
+.insight-title{font-size:14px;font-weight:800;color:var(--black);margin-bottom:8px;line-height:1.35}
+.insight-body{font-size:13px;color:var(--t2);line-height:1.65}
+.insight-body strong{color:var(--black);font-weight:700}
+
+/* ── ACTION BLOCK ── */
+.action-block{background:var(--blue);border-radius:6px;padding:28px 32px;color:#fff}
+.action-eyebrow{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.6);margin-bottom:8px}
+.action-title{font-size:18px;font-weight:900;margin-bottom:12px;line-height:1.3;color:#fff}
+.action-body{font-size:13px;color:rgba(255,255,255,.8);line-height:1.75;margin-bottom:20px}
+.action-body strong{color:#fff;font-weight:700}
+.action-tags{display:flex;flex-wrap:wrap;gap:8px}
+.action-tag{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:4px;padding:5px 14px;font-size:12px;font-weight:700;color:#fff}
+
+/* ── ANNOUNCEMENT CALLOUT ── */
+.announce{background:var(--blue-10);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:0 6px 6px 0;padding:20px 24px;margin-bottom:28px;display:flex;gap:20px;align-items:flex-start}
+.announce-icon{flex-shrink:0;margin-top:2px;width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.announce-icon svg{width:14px;height:14px;fill:#fff}
+.announce-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--blue);margin-bottom:6px}
+.announce-title{font-size:14px;font-weight:800;color:var(--black);margin-bottom:6px}
+.announce-body{font-size:13px;color:var(--t2);line-height:1.65}
+.announce-body strong{color:var(--black);font-weight:700}
+
+/* ── FOOTER ── */
+.footer{border-top:2px solid var(--blue);padding:20px 0;margin-top:24px;display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+.footer-text{font-size:11px;color:var(--t3);line-height:1.7;max-width:640px}
+.footer-text strong{color:var(--t2)}
+
+@media(max-width:900px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .term-grid{grid-template-columns:1fr}
+  .insights-grid{grid-template-columns:1fr}
+}
+
+/* ── PRINT / PDF ── */
+@media print{
+  @page{size:A4 landscape;margin:12mm 14mm}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .nav,.pdf-btn{display:none!important}
+  body{background:#fff!important;font-size:11px}
+  .page{max-width:100%;padding:0}
+  .section{margin-bottom:28px;page-break-inside:avoid}
+  .kpi-row{grid-template-columns:repeat(4,1fr)!important}
+  .term-grid{grid-template-columns:repeat(3,1fr)!important}
+  .insights-grid{grid-template-columns:repeat(2,1fr)!important}
+  .insight,.term-card,.kpi{page-break-inside:avoid}
+  .sh{page-break-after:avoid}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <svg height="18" viewBox="0 0 1486.1 400" xmlns="http://www.w3.org/2000/svg" aria-label="Indeed" style="flex-shrink:0">
+        <path fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" d="M1472.2,71.4c-5.2-5.9-12.2-8.8-21.5-8.8s-16.6,3.1-21.7,9.6c-5,6.3-7.6,15.7-7.6,27.8v88.8c-11.6-12.5-23.6-21.4-35.9-27.4c-7.6-3.7-16.6-6.4-26.7-7.7c-5.9-0.7-11.8-1.1-18.4-1.1c-30.6,0-55.4,10.5-74.4,31.7c-18.8,21-28.2,50.3-28.2,87.8c0,17.7,2.4,34.3,7.2,49.5c4.8,15.1,11.6,28.4,20.8,39.8c9.2,11.2,20.3,19.9,32.8,26.2c12.5,6.1,26.2,9.2,41.1,9.2c6.8,0,13.3-0.6,19.2-1.7c4.1-0.6,7.7-1.7,11.6-2.8c9.4-3.1,18.2-7.6,26.2-13.3c8.3-5.9,16.4-13.4,24.7-22.7v5.9c0,11.1,2.8,19.5,8.3,25.6c5.7,5.9,12.7,9,21,9c8.7,0,15.7-2.9,21-8.5c5.3-5.9,8.3-14.4,8.3-26V96.8C1479.7,85.8,1477.2,77.1,1472.2,71.4z M1409.9,316.5c-5.3,11.2-12.7,19.7-21.4,25.2c-9,5.5-18.8,8.1-29.7,8.1h-0.2c-10.9,0-20.6-2.9-29.7-8.5c-9-5.9-16.2-14.4-21.4-25.8c-5.2-11.4-7.7-25.4-7.7-41.6c0-15.5,2.4-29.1,7.4-40.5c4.8-11.6,11.8-20.6,20.6-26.9c9-6.4,19-9.4,30.4-9.4h0.6c10.7,0,20.4,3.1,29.5,9.2c9,6.1,16.2,14.9,21.5,26.3c5.3,11.4,7.9,25.4,7.9,41.3C1417.9,290.9,1415.3,305.1,1409.9,316.5z M1215.5,319.1c-3.9-3.3-9-5-15.5-5c-5.9,0-10.1,1.5-13.4,3.9c-7.7,7-14,12.7-18.8,16.8c-4.8,3.9-10.1,7.7-16,11.4c-5.5,3.5-11.6,6.3-17.7,7.7c-6.3,1.7-12.9,2.6-20.3,2.6c-1.7,0-3.1,0-4.6-0.2c-9.2-0.6-17.9-3.1-25.6-7.7c-9.2-5.3-16.4-13.1-22.1-23.2c-5.3-10.5-8.3-22.7-8.5-36.3h121c16.2,0,28.7-2.4,37.6-6.6c9-4.6,13.4-14.4,13.4-29.5c0-16.4-4.4-32.4-13.1-48.1c-8.7-15.7-21.4-28.5-38.9-38.3c-17.3-9.9-37.9-14.7-62.1-14.7h-1.8c-17.9,0.2-34.3,3.1-48.8,8.7c-15.3,5.9-28,14.2-38.7,24.9c-10.1,10.9-18.2,23.9-23.6,39.2s-8.3,31.9-8.3,49.5c0,37.8,11.1,67.4,33,89.5c20.8,20.8,49.5,31.9,86.2,33c2,0.2,4.2,0.2,6.4,0.2c17.1,0,32.6-2.2,46-6.6c13.4-4.4,24.5-9.9,33.3-16.6c8.8-6.8,15.5-13.8,19.7-21c4.4-7.2,6.6-13.6,6.6-19C1221.5,327.2,1219.5,322.3,1215.5,319.1z M1071.4,209c9.8-10.3,22.5-15.5,37.9-15.5h0.2c16,0,29.1,5,38.9,15.1c9.8,10.1,15.7,25.6,16.9,46.2h-112C1055.4,234.6,1061.3,219.3,1071.4,209z M952.7,314c-6.1,0-10.3,1.5-13.6,3.9c-7.6,7-14,12.7-18.8,16.8c-4.8,3.9-9.9,7.7-15.8,11.4c-5.7,3.5-11.6,6.3-17.9,7.7c-6.1,1.7-12.9,2.6-20.3,2.6c-1.7,0-3.1,0-4.6-0.2c-9.2-0.6-17.9-3.1-25.6-7.7c-9-5.3-16.4-13.1-21.7-23.2c-5.7-10.5-8.5-22.7-8.7-36.3h120.8c16,0,28.5-2.4,37.6-6.6c8.8-4.6,13.3-14.4,13.3-29.5c0-16.4-4.2-32.4-12.9-48.1s-21.5-28.5-38.9-38.3c-17.3-9.9-38.1-14.7-62.1-14.7h-2c-17.9,0.2-34.1,3.1-48.8,8.7c-15.3,5.9-28,14.2-38.5,24.9c-10.3,10.9-18.4,23.9-23.8,39.2c-5.5,15.3-8.3,31.9-8.3,49.5c0,37.8,11.2,67.4,33.2,89.5c20.8,20.8,49.4,31.9,86,33c2.2,0.2,4.2,0.2,6.4,0.2c17.3,0,32.6-2.2,46-6.6c13.4-4.4,24.5-9.9,33.2-16.6c9-6.8,15.5-13.8,19.9-21c4.4-7.2,6.6-13.6,6.6-19c0-6.1-2-10.9-5.9-14.2C964.1,315.6,958.7,314,952.7,314z M823.7,209c9.8-10.3,22.5-15.5,37.9-15.5h0.2c16,0,29.1,5,38.9,15.1c9.9,10.1,15.7,25.6,17.1,46.2H805.7C807.9,234.6,814,219.3,823.7,209z M134.9,356.5V213c4.2,0.4,8.3,0.6,12.3,0.6c20.1,0,38.9-5.3,54.9-14.5v157.5c0,13.4-3.1,23.4-9.4,30c-6.3,6.6-14.4,9.9-24.5,9.9c-9.8,0-17.7-3.3-23.9-10.1C138.3,379.5,134.9,369.8,134.9,356.5z M716.6,71.4c-5.2-5.9-12.3-8.8-21.4-8.8c-9.4,0-16.6,3.1-21.7,9.6c-5.2,6.3-7.6,27.8-7.6,27.8v88.8c-11.6-12.5-23.6-21.4-35.9-27.4c-7.7-3.7-16.6-6.4-26.5-7.7c-5.7-0.7-11.8-1.1-18.4-1.1c-30.6,0-55.6,10.5-74.4,31.7c-18.8,21-28.2,50.3-28.2,87.8c0,17.7,2.4,34.3,7,49.5c4.8,15.1,11.8,28.4,21,39.8c9.2,11.2,20.3,19.9,32.8,26.2c12.7,6.1,26.2,9.2,41.1,9.2c6.6,0,13.1-0.6,19.2-1.7c4.1-0.6,7.7-1.7,11.6-2.8c9.4-3.1,18.2-7.6,26.2-13.3c8.3-5.9,16.2-13.4,24.7-22.7v5.9c0,11.1,2.8,19.5,8.3,25.6c5.3,5.9,12.7,9,21,9s15.5-2.9,20.8-8.5c5.3-5.9,7.9-14.4,7.9-26V96.8C723.9,85.8,721.5,77.1,716.6,71.4z M654.5,316.5c-5.3,11.2-12.7,19.7-21.5,25.2c-8.8,5.5-18.8,8.1-29.5,8.1h-0.2c-10.9,0-20.6-2.9-29.7-8.5c-9.2-5.9-16.2-14.4-21.4-25.8c-5.2-11.4-7.7-25.4-7.7-41.6c0-15.5,2.4-29.1,7.2-40.5c5-11.6,11.8-20.6,20.8-26.9c8.8-6.4,19-9.4,30.2-9.4h0.7c10.7,0,20.4,3.1,29.3,9.2c9.2,6.1,16.4,14.9,21.7,26.3c5.2,11.4,7.9,25.4,7.9,41.3C662.4,290.9,659.6,305.1,654.5,316.5z M300.9,185.2v7.4c11.1-14,22.8-24.1,35.5-30.8c13.1-6.4,27.8-9.8,44.6-9.8c16.2,0,30.8,3.5,43.6,10.3c12.9,6.8,22.3,16.6,28.5,29.3c4.2,7.4,6.8,15.5,7.9,23.9c1.1,8.3,1.8,19.3,1.8,32.6v111.6c0,12.2-2.9,21.2-8.7,27.3c-5.5,6.3-13.1,9.4-22.1,9.4c-9.2,0-16.6-3.1-22.5-9.6c-5.9-6.3-8.7-15.3-8.7-27.1v-100c0-19.9-2.8-35-8.5-45.5c-5.5-10.5-16.9-15.8-33.9-15.8c-11.1,0-21,3.3-30,9.6c-9,6.4-15.8,15.1-20.1,26.5c-2.9,9-4.4,25.6-4.4,50.3v75c0,12.3-2.9,21.2-8.8,27.4c-5.9,6.1-13.3,9.2-22.5,9.2c-9,0-16.2-3.1-22.1-9.6c-5.9-6.3-8.7-15.3-8.7-27.1V186.2c0-11.4,2.6-20.1,7.7-25.6c5-5.7,12-8.7,21-8.7c5.3,0,10.1,1.1,14.5,3.7s7.9,6.3,10.7,11.2C299.8,172.2,300.9,178.2,300.9,185.2z M135.3,12.7C176.9-1.9,224.5-1.1,260,28.9c6.6,6.1,14.2,13.6,17.1,22.7c3.7,11.2-12.5-1.1-14.9-2.8c-11.6-7.4-23.2-13.6-36.3-17.9c-70-21-136.3,16.9-177.5,76.1c-16.9,26-28.2,53.4-37.4,83.6c-0.9,3.3-1.8,7.6-3.7,10.5c-1.8,3.3-0.7-8.8-0.7-9.4c1.5-12.5,4.1-24.5,7.2-36.6C32.9,90.9,74.9,37.3,135.3,12.7z M216,128.3c0,27.3-22.1,49.5-49.4,49.5s-49.4-22.1-49.4-49.5s22.1-49.5,49.4-49.5S216,100.9,216,128.3z"/>
+      </svg>
+      <div class="nav-brand-divider"></div>
+      <span style="color:rgba(255,255,255,.5);font-weight:600;font-size:13px">Keyword Intelligence</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link active" href="#overview">Overview</a>
+      <a class="nav-link" href="#sectors">Sector Breakdown</a>
+      <a class="nav-link" href="#terms">Search Terms</a>
+      <a class="nav-link" href="#strategy">Strategic Insights</a>
+    </div>
+    <div class="nav-meta">Ireland · Last 12 Months · May 2026</div>
+    <button class="pdf-btn" onclick="downloadPDF()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download PDF
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div style="margin-bottom:18px">
+      <svg height="22" viewBox="0 0 1486.1 400" xmlns="http://www.w3.org/2000/svg" aria-label="Indeed">
+        <path fill="#ffffff" fill-rule="evenodd" clip-rule="evenodd" d="M1472.2,71.4c-5.2-5.9-12.2-8.8-21.5-8.8s-16.6,3.1-21.7,9.6c-5,6.3-7.6,15.7-7.6,27.8v88.8c-11.6-12.5-23.6-21.4-35.9-27.4c-7.6-3.7-16.6-6.4-26.7-7.7c-5.9-0.7-11.8-1.1-18.4-1.1c-30.6,0-55.4,10.5-74.4,31.7c-18.8,21-28.2,50.3-28.2,87.8c0,17.7,2.4,34.3,7.2,49.5c4.8,15.1,11.6,28.4,20.8,39.8c9.2,11.2,20.3,19.9,32.8,26.2c12.5,6.1,26.2,9.2,41.1,9.2c6.8,0,13.3-0.6,19.2-1.7c4.1-0.6,7.7-1.7,11.6-2.8c9.4-3.1,18.2-7.6,26.2-13.3c8.3-5.9,16.4-13.4,24.7-22.7v5.9c0,11.1,2.8,19.5,8.3,25.6c5.7,5.9,12.7,9,21,9c8.7,0,15.7-2.9,21-8.5c5.3-5.9,8.3-14.4,8.3-26V96.8C1479.7,85.8,1477.2,77.1,1472.2,71.4z M1409.9,316.5c-5.3,11.2-12.7,19.7-21.4,25.2c-9,5.5-18.8,8.1-29.7,8.1h-0.2c-10.9,0-20.6-2.9-29.7-8.5c-9-5.9-16.2-14.4-21.4-25.8c-5.2-11.4-7.7-25.4-7.7-41.6c0-15.5,2.4-29.1,7.4-40.5c4.8-11.6,11.8-20.6,20.6-26.9c9-6.4,19-9.4,30.4-9.4h0.6c10.7,0,20.4,3.1,29.5,9.2c9,6.1,16.2,14.9,21.5,26.3c5.3,11.4,7.9,25.4,7.9,41.3C1417.9,290.9,1415.3,305.1,1409.9,316.5z M1215.5,319.1c-3.9-3.3-9-5-15.5-5c-5.9,0-10.1,1.5-13.4,3.9c-7.7,7-14,12.7-18.8,16.8c-4.8,3.9-10.1,7.7-16,11.4c-5.5,3.5-11.6,6.3-17.7,7.7c-6.3,1.7-12.9,2.6-20.3,2.6c-1.7,0-3.1,0-4.6-0.2c-9.2-0.6-17.9-3.1-25.6-7.7c-9.2-5.3-16.4-13.1-22.1-23.2c-5.3-10.5-8.3-22.7-8.5-36.3h121c16.2,0,28.7-2.4,37.6-6.6c9-4.6,13.4-14.4,13.4-29.5c0-16.4-4.4-32.4-13.1-48.1c-8.7-15.7-21.4-28.5-38.9-38.3c-17.3-9.9-37.9-14.7-62.1-14.7h-1.8c-17.9,0.2-34.3,3.1-48.8,8.7c-15.3,5.9-28,14.2-38.7,24.9c-10.1,10.9-18.2,23.9-23.6,39.2s-8.3,31.9-8.3,49.5c0,37.8,11.1,67.4,33,89.5c20.8,20.8,49.5,31.9,86.2,33c2,0.2,4.2,0.2,6.4,0.2c17.1,0,32.6-2.2,46-6.6c13.4-4.4,24.5-9.9,33.3-16.6c8.8-6.8,15.5-13.8,19.7-21c4.4-7.2,6.6-13.6,6.6-19C1221.5,327.2,1219.5,322.3,1215.5,319.1z M1071.4,209c9.8-10.3,22.5-15.5,37.9-15.5h0.2c16,0,29.1,5,38.9,15.1c9.8,10.1,15.7,25.6,16.9,46.2h-112C1055.4,234.6,1061.3,219.3,1071.4,209z M952.7,314c-6.1,0-10.3,1.5-13.6,3.9c-7.6,7-14,12.7-18.8,16.8c-4.8,3.9-9.9,7.7-15.8,11.4c-5.7,3.5-11.6,6.3-17.9,7.7c-6.1,1.7-12.9,2.6-20.3,2.6c-1.7,0-3.1,0-4.6-0.2c-9.2-0.6-17.9-3.1-25.6-7.7c-9-5.3-16.4-13.1-21.7-23.2c-5.7-10.5-8.5-22.7-8.7-36.3h120.8c16,0,28.5-2.4,37.6-6.6c8.8-4.6,13.3-14.4,13.3-29.5c0-16.4-4.2-32.4-12.9-48.1s-21.5-28.5-38.9-38.3c-17.3-9.9-38.1-14.7-62.1-14.7h-2c-17.9,0.2-34.1,3.1-48.8,8.7c-15.3,5.9-28,14.2-38.5,24.9c-10.3,10.9-18.4,23.9-23.8,39.2c-5.5,15.3-8.3,31.9-8.3,49.5c0,37.8,11.2,67.4,33.2,89.5c20.8,20.8,49.4,31.9,86,33c2.2,0.2,4.2,0.2,6.4,0.2c17.3,0,32.6-2.2,46-6.6c13.4-4.4,24.5-9.9,33.2-16.6c9-6.8,15.5-13.8,19.9-21c4.4-7.2,6.6-13.6,6.6-19c0-6.1-2-10.9-5.9-14.2C964.1,315.6,958.7,314,952.7,314z M823.7,209c9.8-10.3,22.5-15.5,37.9-15.5h0.2c16,0,29.1,5,38.9,15.1c9.9,10.1,15.7,25.6,17.1,46.2H805.7C807.9,234.6,814,219.3,823.7,209z M134.9,356.5V213c4.2,0.4,8.3,0.6,12.3,0.6c20.1,0,38.9-5.3,54.9-14.5v157.5c0,13.4-3.1,23.4-9.4,30c-6.3,6.6-14.4,9.9-24.5,9.9c-9.8,0-17.7-3.3-23.9-10.1C138.3,379.5,134.9,369.8,134.9,356.5z M716.6,71.4c-5.2-5.9-12.3-8.8-21.4-8.8c-9.4,0-16.6,3.1-21.7,9.6c-5.2,6.3-7.6,27.8-7.6,27.8v88.8c-11.6-12.5-23.6-21.4-35.9-27.4c-7.7-3.7-16.6-6.4-26.5-7.7c-5.7-0.7-11.8-1.1-18.4-1.1c-30.6,0-55.6,10.5-74.4,31.7c-18.8,21-28.2,50.3-28.2,87.8c0,17.7,2.4,34.3,7,49.5c4.8,15.1,11.8,28.4,21,39.8c9.2,11.2,20.3,19.9,32.8,26.2c12.7,6.1,26.2,9.2,41.1,9.2c6.6,0,13.1-0.6,19.2-1.7c4.1-0.6,7.7-1.7,11.6-2.8c9.4-3.1,18.2-7.6,26.2-13.3c8.3-5.9,16.2-13.4,24.7-22.7v5.9c0,11.1,2.8,19.5,8.3,25.6c5.3,5.9,12.7,9,21,9s15.5-2.9,20.8-8.5c5.3-5.9,7.9-14.4,7.9-26V96.8C723.9,85.8,721.5,77.1,716.6,71.4z M654.5,316.5c-5.3,11.2-12.7,19.7-21.5,25.2c-8.8,5.5-18.8,8.1-29.5,8.1h-0.2c-10.9,0-20.6-2.9-29.7-8.5c-9.2-5.9-16.2-14.4-21.4-25.8c-5.2-11.4-7.7-25.4-7.7-41.6c0-15.5,2.4-29.1,7.2-40.5c5-11.6,11.8-20.6,20.8-26.9c8.8-6.4,19-9.4,30.2-9.4h0.7c10.7,0,20.4,3.1,29.3,9.2c9.2,6.1,16.4,14.9,21.7,26.3c5.2,11.4,7.9,25.4,7.9,41.3C662.4,290.9,659.6,305.1,654.5,316.5z M300.9,185.2v7.4c11.1-14,22.8-24.1,35.5-30.8c13.1-6.4,27.8-9.8,44.6-9.8c16.2,0,30.8,3.5,43.6,10.3c12.9,6.8,22.3,16.6,28.5,29.3c4.2,7.4,6.8,15.5,7.9,23.9c1.1,8.3,1.8,19.3,1.8,32.6v111.6c0,12.2-2.9,21.2-8.7,27.3c-5.5,6.3-13.1,9.4-22.1,9.4c-9.2,0-16.6-3.1-22.5-9.6c-5.9-6.3-8.7-15.3-8.7-27.1v-100c0-19.9-2.8-35-8.5-45.5c-5.5-10.5-16.9-15.8-33.9-15.8c-11.1,0-21,3.3-30,9.6c-9,6.4-15.8,15.1-20.1,26.5c-2.9,9-4.4,25.6-4.4,50.3v75c0,12.3-2.9,21.2-8.8,27.4c-5.9,6.1-13.3,9.2-22.5,9.2c-9,0-16.2-3.1-22.1-9.6c-5.9-6.3-8.7-15.3-8.7-27.1V186.2c0-11.4,2.6-20.1,7.7-25.6c5-5.7,12-8.7,21-8.7c5.3,0,10.1,1.1,14.5,3.7s7.9,6.3,10.7,11.2C299.8,172.2,300.9,178.2,300.9,185.2z M135.3,12.7C176.9-1.9,224.5-1.1,260,28.9c6.6,6.1,14.2,13.6,17.1,22.7c3.7,11.2-12.5-1.1-14.9-2.8c-11.6-7.4-23.2-13.6-36.3-17.9c-70-21-136.3,16.9-177.5,76.1c-16.9,26-28.2,53.4-37.4,83.6c-0.9,3.3-1.8,7.6-3.7,10.5c-1.8,3.3-0.7-8.8-0.7-9.4c1.5-12.5,4.1-24.5,7.2-36.6C32.9,90.9,74.9,37.3,135.3,12.7z M216,128.3c0,27.3-22.1,49.5-49.4,49.5s-49.4-22.1-49.4-49.5s22.1-49.5,49.4-49.5S216,100.9,216,128.3z"/>
+      </svg>
+    </div>
+    <div class="hero-eyebrow">Virtue · Keyword Intelligence</div>
+    <div class="hero-title">Maternity-Related Search Behaviour<br>in Ireland</div>
+    <div class="hero-subtitle">An analysis of job seeker search activity on Indeed Ireland — every time a candidate searched a maternity-related keyword and clicked a job listing, broken down by the sector of the role they clicked. This data identifies the active candidate pool already searching for these terms.</div>
+    <div class="hero-meta">
+      <div class="hero-tag">Ireland · Nationwide</div>
+      <div class="hero-tag">Jan 2025 – Apr 2026</div>
+      <div class="hero-tag">6 Sectors Analysed</div>
+      <div class="hero-tag">2,011 Total Clicks</div>
+      <div class="hero-tag">Strictly Confidential</div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════
+     01 — OVERVIEW
+══════════════════════════════════════ -->
+<section class="section" id="overview">
+  <div class="sh">
+    <div>
+      <div class="sh-num">01 — Overview</div>
+      <div class="sh-title">Maternity Keyword Performance at a Glance</div>
+      <div class="sh-desc">Top-line metrics from maternity-related search activity across Indeed Ireland. All figures represent job click events — a job seeker searched a maternity keyword, saw a listing, and clicked it.</div>
+    </div>
+  </div>
+
+  <!-- Announcement callout -->
+  <div class="announce">
+    <div class="announce-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+    <div class="announce-content">
+      <div class="announce-label">Context — Fern Dean Blackrock Announcement</div>
+      <div class="announce-title">Virtue is First Private Nursing Home Group in Ireland to Offer Paid Maternity Top-Up</div>
+      <div class="announce-body">The Fern Dean Blackrock (Virtue) announced enhanced maternity and adoptive leave benefits effective <strong>1 May 2026</strong>: up to <strong>75% of gross salary</strong> during leave, <strong>26 weeks fully covered</strong>, and inclusive adoptive leave support. Available to Clinical, Catering and Housekeeping teams on permanent contracts with 3+ years of service. This analysis shows the size and shape of the candidate audience already searching for these terms — and where Virtue's ad spend will have the greatest impact.</div>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-val">2,011</div>
+      <div class="kpi-lbl">Total Maternity Clicks</div>
+      <div class="kpi-sub">Ireland · Last 12 months</div>
+    </div>
+    <div class="kpi kpi-inv">
+      <div class="kpi-val">51.5%</div>
+      <div class="kpi-lbl">Care Sector Share</div>
+      <div class="kpi-sub">1,036 of 2,011 total clicks</div>
+      <div class="kpi-tag">#1 Ranked Sector</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val">532</div>
+      <div class="kpi-lbl">Med / Nurse Clicks</div>
+      <div class="kpi-sub">26.5% share · 2nd ranked</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val">5 of 6</div>
+      <div class="kpi-lbl">Sectors — "Maternity Cover"</div>
+      <div class="kpi-sub">Most versatile search term</div>
+    </div>
+  </div>
+
+  <!-- Context box -->
+  <div class="context-box">
+    <p><strong>What this data measures:</strong> The Indeed <em>adclick2</em> index records every job click event — both sponsored and organic listings. Each row represents one click by a job seeker. This analysis filters to clicks where the search query contained a maternity-related keyword (e.g. "maternity care assistant", "maternity cover", "maternity nurse"). The sector shown is based on the <em>job that was clicked</em>, not the search intent. So a candidate searching "maternity cover" who clicks a Care sector role is counted in Care. This reveals which sectors are successfully capturing candidate attention when maternity benefits are front of mind — and where Virtue's announcement will land with the highest-intent audience.</p>
+  </div>
+
+  <!-- Summary table -->
+  <div class="summary-table-wrap">
+    <table class="summary-table" id="summary-tbl"></table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     02 — SECTOR BREAKDOWN
+══════════════════════════════════════ -->
+<section class="section" id="sectors">
+  <div class="sh">
+    <div>
+      <div class="sh-num">02 — Sector Breakdown</div>
+      <div class="sh-title">Job Clicks by Sector — Ranked by Volume</div>
+      <div class="sh-desc">Each bar represents the number of job click events where the job seeker had searched a maternity-related keyword. The sector is based on the role clicked, not the search query.</div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-label">Maternity-Related Job Clicks by Sector</div>
+    <div class="chart-sub">Ireland · Last 12 months · Sponsored + organic clicks included</div>
+    <div class="bar-track" id="bar-chart"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     03 — SEARCH TERMS
+══════════════════════════════════════ -->
+<section class="section" id="terms">
+  <div class="sh">
+    <div>
+      <div class="sh-num">03 — Search Terms</div>
+      <div class="sh-title">Top Maternity Keywords by Sector</div>
+      <div class="sh-desc">The specific search queries that job seekers typed before clicking a job in each sector. Ranked by click volume within each sector.</div>
+    </div>
+  </div>
+
+  <div class="term-grid" id="term-cards"></div>
+</section>
+
+<!-- ══════════════════════════════════════
+     04 — STRATEGIC INSIGHTS
+══════════════════════════════════════ -->
+<section class="section" id="strategy">
+  <div class="sh">
+    <div>
+      <div class="sh-num">04 — Strategic Insights</div>
+      <div class="sh-title">Turning Search Behaviour into Hiring Advantage</div>
+      <div class="sh-desc">Four board-level findings from the keyword data — translated into actionable direction for Virtue's Sponsored Jobs and Employer Branding strategy.</div>
+    </div>
+  </div>
+
+  <div class="insights-grid">
+    <div class="insight">
+      <div class="insight-num">Insight 01 — Care Sector Dominance</div>
+      <div class="insight-stat">51.5%</div>
+      <div class="insight-title">Care Owns the Majority of All Maternity-Related Job Clicks in Ireland</div>
+      <div class="insight-body">With 1,036 of 2,011 total clicks, the Care sector is the clear #1. <strong>"Maternity care assistant" alone drove 384 searches</strong> — the single highest-volume individual term in the entire dataset. Virtue's announcement is precisely on-brand for this audience. Sponsored Jobs targeting this keyword should see strong click-through and direct pipeline impact in Care Homes and Home Care divisions alike.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-num">Insight 02 — Cross-Sector Cover Demand</div>
+      <div class="insight-stat">5 of 6</div>
+      <div class="insight-title">"Maternity Cover" Appears in 5 of 6 Sectors — Signalling Temp Role Demand</div>
+      <div class="insight-body">This term surfaces across Care (163 clicks), Customer Service (137), Food (19), Childcare (11), and Personal Care (2). It signals candidates actively seeking <strong>temporary placements to fill roles during colleagues' maternity leave</strong> — a consistent gap Virtue can advertise against. Highlighting flexible and fixed-term contract options alongside the enhanced benefit in job copy positions Virtue ahead of employers leading only on salary.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-num">Insight 03 — Nursing Differentiation</div>
+      <div class="insight-stat">532</div>
+      <div class="insight-title">Med/Nurse at 532 Clicks — Care Home Roles Must Lead with Benefits</div>
+      <div class="insight-body">With "maternity nurse" generating 234 clicks, this is an active direct clinical role search. <strong>Virtue's Care Homes (Caroline, Márcio) should feature the enhanced maternity benefit prominently in all RGN and HCA job descriptions</strong> to differentiate from competitors who have not yet made this move. Ireland's first private nursing home group to offer a paid top-up is a genuine, defensible differentiator at the point of candidate decision.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-num">Insight 04 — Budget Concentration</div>
+      <div class="insight-stat">1.7%</div>
+      <div class="insight-title">Childcare and Personal Care Are Negligible — Focus Spend Where It Counts</div>
+      <div class="insight-body">Combined, Childcare (29 clicks) and Personal Care (6 clicks) represent just 1.7% of all maternity-related job clicks. <strong>Virtue's keyword targeting budget should be concentrated entirely on Care and Med/Nurse sectors.</strong> Geo-targeting should focus on Fingal and Dublin City — the two highest-demand Local Authority Areas in Virtue's existing market intelligence data from the Dublin Healthcare Report.</div>
+    </div>
+  </div>
+
+  <div class="action-block">
+    <div class="action-eyebrow">Recommended Action — Employer Branding &amp; Sponsored Jobs</div>
+    <div class="action-title">Lead with Ireland's First Paid Maternity Top-Up in Private Nursing</div>
+    <div class="action-body">
+      Position Virtue as: <strong>"The first private nursing home group in Ireland to offer a paid maternity top-up."</strong> Use <strong>"maternity care assistant"</strong>, <strong>"maternity cover"</strong>, and <strong>"maternity support worker"</strong> as primary keyword targets in Sponsored Jobs and Employer Branding Ads across Virtue's business units. Geo-target campaigns to <strong>Fingal</strong> and <strong>Dublin City</strong> — the two highest-demand Local Authority Areas in Virtue's existing Dublin Healthcare Market Intelligence data. This announcement is a genuine differentiator that no competitor has matched yet — it should be placed front and centre in all job copy across Home Care and Care Homes.
+    </div>
+    <div class="action-tags">
+      <div class="action-tag">maternity care assistant</div>
+      <div class="action-tag">maternity cover</div>
+      <div class="action-tag">maternity support worker</div>
+      <div class="action-tag">maternity nurse</div>
+      <div class="action-tag">maternity healthcare assistant</div>
+      <div class="action-tag">paid maternity leave</div>
+      <div class="action-tag">maternity nursing vacancies in ireland</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-text">
+    <strong>Data Source:</strong> Indeed adclick2 index — Ireland · Last 12 months · Maternity keyword filter applied to search query field (q) · Sector mapped via normTitleCategory · All clicks included (sponsored + organic) · Clicks counted per event, not per unique job seeker.<br>
+    <strong>Prepared exclusively for Virtue. Strictly confidential.</strong> Not for distribution or reproduction without prior written consent.
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;flex-shrink:0">
+    <button class="pdf-btn" onclick="downloadPDF()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download PDF
+    </button>
+    <svg height="26" viewBox="0 0 1486.1 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Indeed">
+      <path fill="#003A9B" fill-rule="evenodd" clip-rule="evenodd" d="M1472.2,71.4c-5.2-5.9-12.2-8.8-21.5-8.8s-16.6,3.1-21.7,9.6c-5,6.3-7.6,15.7-7.6,27.8v88.8c-11.6-12.5-23.6-21.4-35.9-27.4c-7.6-3.7-16.6-6.4-26.7-7.7c-5.9-0.7-11.8-1.1-18.4-1.1c-30.6,0-55.4,10.5-74.4,31.7c-18.8,21-28.2,50.3-28.2,87.8c0,17.7,2.4,34.3,7.2,49.5c4.8,15.1,11.6,28.4,20.8,39.8c9.2,11.2,20.3,19.9,32.8,26.2c12.5,6.1,26.2,9.2,41.1,9.2c6.8,0,13.3-0.6,19.2-1.7c4.1-0.6,7.7-1.7,11.6-2.8c9.4-3.1,18.2-7.6,26.2-13.3c8.3-5.9,16.4-13.4,24.7-22.7v5.9c0,11.1,2.8,19.5,8.3,25.6c5.7,5.9,12.7,9,21,9c8.7,0,15.7-2.9,21-8.5c5.3-5.9,8.3-14.4,8.3-26V96.8C1479.7,85.8,1477.2,77.1,1472.2,71.4z M1409.9,316.5c-5.3,11.2-12.7,19.7-21.4,25.2c-9,5.5-18.8,8.1-29.7,8.1h-0.2c-10.9,0-20.6-2.9-29.7-8.5c-9-5.9-16.2-14.4-21.4-25.8c-5.2-11.4-7.7-25.4-7.7-41.6c0-15.5,2.4-29.1,7.4-40.5c4.8-11.6,11.8-20.6,20.6-26.9c9-6.4,19-9.4,30.4-9.4h0.6c10.7,0,20.4,3.1,29.5,9.2c9,6.1,16.2,14.9,21.5,26.3c5.3,11.4,7.9,25.4,7.9,41.3C1417.9,290.9,1415.3,305.1,1409.9,316.5z M1215.5,319.1c-3.9-3.3-9-5-15.5-5c-5.9,0-10.1,1.5-13.4,3.9c-7.7,7-14,12.7-18.8,16.8c-4.8,3.9-10.1,7.7-16,11.4c-5.5,3.5-11.6,6.3-17.7,7.7c-6.3,1.7-12.9,2.6-20.3,2.6c-1.7,0-3.1,0-4.6-0.2c-9.2-0.6-17.9-3.1-25.6-7.7c-9.2-5.3-16.4-13.1-22.1-23.2c-5.3-10.5-8.3-22.7-8.5-36.3h121c16.2,0,28.7-2.4,37.6-6.6c9-4.6,13.4-14.4,13.4-29.5c0-16.4-4.4-32.4-13.1-48.1c-8.7-15.7-21.4-28.5-38.9-38.3c-17.3-9.9-37.9-14.7-62.1-14.7h-1.8c-17.9,0.2-34.3,3.1-48.8,8.7c-15.3,5.9-28,14.2-38.7,24.9c-10.1,10.9-18.2,23.9-23.6,39.2s-8.3,31.9-8.3,49.5c0,37.8,11.1,67.4,33,89.5c20.8,20.8,49.5,31.9,86.2,33c2,0.2,4.2,0.2,6.4,0.2c17.1,0,32.6-2.2,46-6.6c13.4-4.4,24.5-9.9,33.3-16.6c8.8-6.8,15.5-13.8,19.7-21c4.4-7.2,6.6-13.6,6.6-19C1221.5,327.2,1219.5,322.3,1215.5,319.1z M1071.4,209c9.8-10.3,22.5-15.5,37.9-15.5h0.2c16,0,29.1,5,38.9,15.1c9.8,10.1,15.7,25.6,16.9,46.2h-112C1055.4,234.6,1061.3,219.3,1071.4,209z M952.7,314c-6.1,0-10.3,1.5-13.6,3.9c-7.6,7-14,12.7-18.8,16.8c-4.8,3.9-9.9,7.7-15.8,11.4c-5.7,3.5-11.6,6.3-17.9,7.7c-6.1,1.7-12.9,2.6-20.3,2.6c-1.7,0-3.1,0-4.6-0.2c-9.2-0.6-17.9-3.1-25.6-7.7c-9-5.3-16.4-13.1-21.7-23.2c-5.7-10.5-8.5-22.7-8.7-36.3h120.8c16,0,28.5-2.4,37.6-6.6c8.8-4.6,13.3-14.4,13.3-29.5c0-16.4-4.2-32.4-12.9-48.1s-21.5-28.5-38.9-38.3c-17.3-9.9-38.1-14.7-62.1-14.7h-2c-17.9,0.2-34.1,3.1-48.8,8.7c-15.3,5.9-28,14.2-38.5,24.9c-10.3,10.9-18.4,23.9-23.8,39.2c-5.5,15.3-8.3,31.9-8.3,49.5c0,37.8,11.2,67.4,33.2,89.5c20.8,20.8,49.4,31.9,86,33c2.2,0.2,4.2,0.2,6.4,0.2c17.3,0,32.6-2.2,46-6.6c13.4-4.4,24.5-9.9,33.2-16.6c9-6.8,15.5-13.8,19.9-21c4.4-7.2,6.6-13.6,6.6-19c0-6.1-2-10.9-5.9-14.2C964.1,315.6,958.7,314,952.7,314z M823.7,209c9.8-10.3,22.5-15.5,37.9-15.5h0.2c16,0,29.1,5,38.9,15.1c9.9,10.1,15.7,25.6,17.1,46.2H805.7C807.9,234.6,814,219.3,823.7,209z M134.9,356.5V213c4.2,0.4,8.3,0.6,12.3,0.6c20.1,0,38.9-5.3,54.9-14.5v157.5c0,13.4-3.1,23.4-9.4,30c-6.3,6.6-14.4,9.9-24.5,9.9c-9.8,0-17.7-3.3-23.9-10.1C138.3,379.5,134.9,369.8,134.9,356.5z M716.6,71.4c-5.2-5.9-12.3-8.8-21.4-8.8c-9.4,0-16.6,3.1-21.7,9.6c-5.2,6.3-7.6,27.8-7.6,27.8v88.8c-11.6-12.5-23.6-21.4-35.9-27.4c-7.7-3.7-16.6-6.4-26.5-7.7c-5.7-0.7-11.8-1.1-18.4-1.1c-30.6,0-55.6,10.5-74.4,31.7c-18.8,21-28.2,50.3-28.2,87.8c0,17.7,2.4,34.3,7,49.5c4.8,15.1,11.8,28.4,21,39.8c9.2,11.2,20.3,19.9,32.8,26.2c12.7,6.1,26.2,9.2,41.1,9.2c6.6,0,13.1-0.6,19.2-1.7c4.1-0.6,7.7-1.7,11.6-2.8c9.4-3.1,18.2-7.6,26.2-13.3c8.3-5.9,16.2-13.4,24.7-22.7v5.9c0,11.1,2.8,19.5,8.3,25.6c5.3,5.9,12.7,9,21,9s15.5-2.9,20.8-8.5c5.3-5.9,7.9-14.4,7.9-26V96.8C723.9,85.8,721.5,77.1,716.6,71.4z M654.5,316.5c-5.3,11.2-12.7,19.7-21.5,25.2c-8.8,5.5-18.8,8.1-29.5,8.1h-0.2c-10.9,0-20.6-2.9-29.7-8.5c-9.2-5.9-16.2-14.4-21.4-25.8c-5.2-11.4-7.7-25.4-7.7-41.6c0-15.5,2.4-29.1,7.2-40.5c5-11.6,11.8-20.6,20.8-26.9c8.8-6.4,19-9.4,30.2-9.4h0.7c10.7,0,20.4,3.1,29.3,9.2c9.2,6.1,16.4,14.9,21.7,26.3c5.2,11.4,7.9,25.4,7.9,41.3C662.4,290.9,659.6,305.1,654.5,316.5z M300.9,185.2v7.4c11.1-14,22.8-24.1,35.5-30.8c13.1-6.4,27.8-9.8,44.6-9.8c16.2,0,30.8,3.5,43.6,10.3c12.9,6.8,22.3,16.6,28.5,29.3c4.2,7.4,6.8,15.5,7.9,23.9c1.1,8.3,1.8,19.3,1.8,32.6v111.6c0,12.2-2.9,21.2-8.7,27.3c-5.5,6.3-13.1,9.4-22.1,9.4c-9.2,0-16.6-3.1-22.5-9.6c-5.9-6.3-8.7-15.3-8.7-27.1v-100c0-19.9-2.8-35-8.5-45.5c-5.5-10.5-16.9-15.8-33.9-15.8c-11.1,0-21,3.3-30,9.6c-9,6.4-15.8,15.1-20.1,26.5c-2.9,9-4.4,25.6-4.4,50.3v75c0,12.3-2.9,21.2-8.8,27.4c-5.9,6.1-13.3,9.2-22.5,9.2c-9,0-16.2-3.1-22.1-9.6c-5.9-6.3-8.7-15.3-8.7-27.1V186.2c0-11.4,2.6-20.1,7.7-25.6c5-5.7,12-8.7,21-8.7c5.3,0,10.1,1.1,14.5,3.7s7.9,6.3,10.7,11.2C299.8,172.2,300.9,178.2,300.9,185.2z M135.3,12.7C176.9-1.9,224.5-1.1,260,28.9c6.6,6.1,14.2,13.6,17.1,22.7c3.7,11.2-12.5-1.1-14.9-2.8c-11.6-7.4-23.2-13.6-36.3-17.9c-70-21-136.3,16.9-177.5,76.1c-16.9,26-28.2,53.4-37.4,83.6c-0.9,3.3-1.8,7.6-3.7,10.5c-1.8,3.3-0.7-8.8-0.7-9.4c1.5-12.5,4.1-24.5,7.2-36.6C32.9,90.9,74.9,37.3,135.3,12.7z M216,128.3c0,27.3-22.1,49.5-49.4,49.5s-49.4-22.1-49.4-49.5s22.1-49.5,49.4-49.5S216,100.9,216,128.3z"/>
+    </svg>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<script>
+const KW_DATA = [
+  { name:'Care', clicks:1036, share:51.5, color:'#2557a7', termColor:'#2557a7', terms:[
+    {term:'maternity care assistant',clicks:384},{term:'maternity cover',clicks:163},
+    {term:'maternity support worker',clicks:94},{term:'maternity healthcare assistant',clicks:64},
+    {term:'maternity',clicks:52}
+  ]},
+  { name:'Med / Nurse', clicks:532, share:26.5, color:'#3d6db8', termColor:'#3d6db8', terms:[
+    {term:'maternity nurse',clicks:234},{term:'maternity hospital',clicks:49},
+    {term:'cork university maternity',clicks:43},{term:'maternity',clicks:38},
+    {term:'maternity nursing vacancies in ireland',clicks:20}
+  ]},
+  { name:'Customer Service', clicks:281, share:14.0, color:'#5585c9', termColor:'#5585c9', terms:[
+    {term:'maternity cover',clicks:137},{term:'paid maternity leave',clicks:26},
+    {term:'maternity',clicks:21},{term:'maternity leave',clicks:19},
+    {term:'maternity health assistants',clicks:14}
+  ]},
+  { name:'Food', clicks:127, share:6.3, color:'#6d9eda', termColor:'#6d9eda', terms:[
+    {term:'maternity care assistant',clicks:21},{term:'maternity cover',clicks:19},
+    {term:'cork university maternity',clicks:17},{term:'maternity',clicks:11},
+    {term:'maternity hospital',clicks:10}
+  ]},
+  { name:'Childcare', clicks:29, share:1.4, color:'#8cb7eb', termColor:'#8cb7eb', terms:[
+    {term:'maternity cover',clicks:11},{term:'maternity care assistant',clicks:7},
+    {term:'maternity healthcare assistant',clicks:3},{term:'paid maternity leave',clicks:3},
+    {term:'maternity',clicks:1}
+  ]},
+  { name:'Personal Care', clicks:6, share:0.3, color:'#aad0fc', termColor:'#aad0fc', terms:[
+    {term:'maternity care assistant',clicks:2},{term:'maternity cover',clicks:2},
+    {term:'maternity care support',clicks:1},{term:'maternity leave',clicks:1}
+  ]}
+];
+const TOTAL = 2011;
+const MAX = KW_DATA[0].clicks;
+
+// Summary table
+(function(){
+  const tbl = document.getElementById('summary-tbl');
+  if(!tbl) return;
+  tbl.innerHTML = `<thead><tr>
+    <th class="r" style="width:50px">Rank</th>
+    <th>Sector</th>
+    <th class="r">Total Clicks</th>
+    <th class="r">% Share</th>
+    <th style="min-width:200px">Volume</th>
+    <th>Top Search Term</th>
+  </tr></thead>`;
+  const tbody = document.createElement('tbody');
+  KW_DATA.forEach((d,i) => {
+    const barW = Math.round((d.clicks/MAX)*180);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="rank">${i+1}</td>
+      <td style="font-weight:700;color:#1a1a1a">${d.name}</td>
+      <td class="r" style="font-size:15px;font-weight:800">${d.clicks.toLocaleString()}</td>
+      <td class="r">${d.share}%</td>
+      <td><span class="rank-bar" style="width:${barW}px;background:${d.color}"></span></td>
+      <td style="font-size:12px;color:#4a4a4a;font-style:italic">${d.terms[0].term} (${d.terms[0].clicks})</td>`;
+    tbody.appendChild(tr);
+  });
+  // totals row
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td></td><td>GRAND TOTAL</td><td class="r">${TOTAL.toLocaleString()}</td><td class="r">100%</td><td></td><td></td>`;
+  tbody.appendChild(tr);
+  tbl.appendChild(tbody);
+})();
+
+// Bar chart
+(function(){
+  const wrap = document.getElementById('bar-chart');
+  if(!wrap) return;
+  KW_DATA.forEach(d => {
+    const pct = Math.round((d.clicks/MAX)*100);
+    wrap.insertAdjacentHTML('beforeend',`
+      <div class="bar-row">
+        <div class="bar-name">${d.name}</div>
+        <div class="bar-outer">
+          <div class="bar-inner" style="width:${pct}%;background:${d.color}">
+            <span class="bar-val">${d.clicks.toLocaleString()}</span>
+          </div>
+        </div>
+        <div class="bar-pct">${d.share}%</div>
+      </div>`);
+  });
+})();
+
+// Term cards
+(function(){
+  const wrap = document.getElementById('term-cards');
+  if(!wrap) return;
+  KW_DATA.forEach(d => {
+    const rows = d.terms.map((t,i) =>
+      `<tr><td><span class="term-card-rank">${i+1}</span>${t.term}</td><td>${t.clicks}</td></tr>`
+    ).join('');
+    wrap.insertAdjacentHTML('beforeend',`
+      <div class="term-card">
+        <div class="term-card-head">
+          <div class="term-card-name">${d.name}</div>
+          <div class="term-card-badge">${d.clicks.toLocaleString()} clicks · ${d.share}%</div>
+        </div>
+        <div class="term-card-body"><table>${rows}</table></div>
+      </div>`);
+  });
+})();
+
+// Scroll-aware nav
+const secs = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  secs.forEach(s=>{ if(window.scrollY>=s.offsetTop-80) cur=s.id; });
+  links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+cur));
+},{passive:true});
+
+function downloadPDF(){
+  setTimeout(()=>{ window.print(); },100);
+}
+</script>
+</body>
+</html>
